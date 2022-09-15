@@ -1,0 +1,27 @@
+{
+  "name": "project-x-nfts",
+  "version": "1.0.0",
+  "repository": "git@github.com:zircon-tech/deploy-a-token-standard-alejandrodk.git",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "REPORT_GAS=true npx hardhat test",
+    "init": "yarn add --dev hardhat && npx hardhat",
+    "node": "npx hardhat node",
+    "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.ts",
+    "deploy:goerli": "npx hardhat run scripts/deploy.ts --network goerli"
+  },
+  "keywords": [],
+  "author": "Alejandro Barrios <alejandrodk.eth>",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "hardhat": "^2.11.2",
+    "hardhat-gas-reporter": "^1.0.9"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.3",
+    "@types/dotenv": "^8.2.0",
+    "dotenv": "^16.0.2"
+  }
+}
