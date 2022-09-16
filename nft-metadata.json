@@ -1,0 +1,11 @@
+{
+  "attributes": [
+    {
+      "trait_type": "Dummy",
+      "value": "Foo"
+    }
+  ],
+  "description": "Test NFT",
+  "image": "https://gateway.pinata.cloud/ipfs/QmUUPEU85n318pHKR6or4bk866PZmmiLfNFpAHwkoArbPw",
+  "name": "AlejandroDk"
+}
