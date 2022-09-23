@@ -10,29 +10,21 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _nftIds;
 
-    mapping(uint256 => mapping(uint256 => address)) private _owners;
-
-    uint256 public constant DUMMY = 1;
-    uint256 public constant WEARABLE = 2;
-
     string public name = "XNft-collection-V2";
     string public symbol = "XNftV2";
 
     constructor() ERC1155("") {}
 
-    function mint(
-        address recipient,
-        uint256 tokenId,
-        uint256 amount,
-        string memory tokenURI
-    ) public onlyOwner returns (uint256) {
-        require(_validIds(_asSingletonArr(tokenId)), "Invalid token ID");
+    function mint(address recipient, string memory tokenURI)
+        public
+        onlyOwner
+        returns (uint256)
+    {
         _nftIds.increment();
 
         uint256 nftId = _nftIds.current();
 
-        _mint(recipient, tokenId, amount, "");
-        _owners[tokenId][nftId] = recipient;
+        _mint(recipient, nftId, 1, "");
         _setURI(nftId, tokenURI);
 
         return nftId;
@@ -40,38 +32,18 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
 
     function mintBatch(
         address recipient,
-        uint256[] memory tokenIds,
         uint256[] memory amounts,
         string[] memory tokenURIs
     ) public onlyOwner {
-        require(_validIds(tokenIds), "Invalid token ID");
+        uint256[] memory nftIds;
 
-        _mintBatch(recipient, tokenIds, amounts, "");
-
-        for (uint256 i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < amounts.length; i++) {
             _nftIds.increment();
-            uint256 nftId = _nftIds.current();
+            nftIds[i] = _nftIds.current();
 
-            _owners[tokenIds[i]][nftId] = recipient;
-            _setURI(nftId, tokenURIs[i]);
+            _setURI(nftIds[i], tokenURIs[i]);
         }
-    }
 
-    function _validIds(uint256[] memory tokenIds) internal pure returns (bool) {
-        bool isValid = true;
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            isValid = tokenIds[i] == DUMMY || tokenIds[i] == WEARABLE;
-        }
-        return isValid;
-    }
-
-    function _asSingletonArr(uint256 element)
-        internal
-        pure
-        returns (uint256[] memory)
-    {
-        uint256[] memory array = new uint256[](1);
-        array[0] = element;
-        return array;
+        _mintBatch(recipient, nftIds, amounts, "");
     }
 }
