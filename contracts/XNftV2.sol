@@ -15,6 +15,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         DUMMY,
         WEARABLE
     }
+
     mapping(uint256 => NftClass) private _classes;
     mapping(address => uint256) private _dummyOwners;
 
@@ -23,11 +24,16 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
 
     constructor() ERC1155("") {}
 
+    modifier notContractCall() {
+        require(tx.origin == msg.sender, "The caller is another contract");
+        _;
+    }
+
     function mint(
         address recipient,
         string memory tokenURI,
         NftClass class
-    ) public onlyOwner returns (uint256) {
+    ) public onlyOwner notContractCall returns (uint256) {
         if (class == NftClass.DUMMY && _dummyOwners[recipient] > 0) {
             revert("Only one dummy per address allowed");
         }
@@ -52,7 +58,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         uint256[] memory amounts,
         string[] memory tokenURIs,
         NftClass[] memory classes
-    ) public onlyOwner {
+    ) public onlyOwner notContractCall {
         uint256[] memory nftIds;
         uint256 dummies = 0;
 
