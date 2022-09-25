@@ -10,13 +10,13 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _nftIds;
 
-    enum NftClass {
+    enum NftType {
         BACKGROUND,
         DUMMY,
         WEARABLE
     }
 
-    mapping(uint256 => NftClass) private _classes;
+    mapping(uint256 => NftType) private _typesById;
     mapping(address => uint256) private _dummyOwners;
 
     string public name = "XNft-collection-V2";
@@ -32,13 +32,13 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
     function mint(
         address recipient,
         string memory tokenURI,
-        NftClass class
+        NftType nftType
     ) public onlyOwner notContractCall returns (uint256) {
-        if (class == NftClass.DUMMY && _dummyOwners[recipient] > 0) {
+        if (nftType == NftType.DUMMY && _dummyOwners[recipient] > 0) {
             revert("Only one dummy per address allowed");
         }
 
-        if (class == NftClass.DUMMY) {
+        if (nftType == NftType.DUMMY) {
             _dummyOwners[recipient] += 1;
         }
 
@@ -48,7 +48,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
 
         _mint(recipient, nftId, 1, "");
         _setURI(nftId, tokenURI);
-        _classes[nftId] = class;
+        _typesById[nftId] = nftType;
 
         return nftId;
     }
@@ -57,7 +57,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         address recipient,
         uint256[] memory amounts,
         string[] memory tokenURIs,
-        NftClass[] memory classes
+        NftType[] memory nftTypes
     ) public onlyOwner notContractCall {
         uint256[] memory nftIds;
         uint256 dummies = 0;
@@ -65,12 +65,12 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         for (uint256 i = 0; i < amounts.length; i++) {
             _nftIds.increment();
             nftIds[i] = _nftIds.current();
-            if (classes[i] == NftClass.DUMMY) {
+            if (nftTypes[i] == NftType.DUMMY) {
                 dummies += amounts[i];
             }
 
             _setURI(nftIds[i], tokenURIs[i]);
-            _classes[nftIds[i]] = classes[i];
+            _typesById[nftIds[i]] = nftTypes[i];
         }
 
         require(dummies <= 1, "Only one dummy per address allowed");
@@ -89,7 +89,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
         for (uint256 i = 0; i < ids.length; i++) {
             require(
-                _classes[ids[i]] != NftClass.DUMMY,
+                _typesById[ids[i]] != NftType.DUMMY,
                 "Unable to transfer dummy"
             );
         }
