@@ -19,8 +19,8 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
     mapping(uint256 => NftType) private _typesById;
     mapping(address => uint256) private _dummyOwners;
 
-    string public name = "XNft-collection-V2";
-    string public symbol = "XNftV2";
+    string public constant name = "XNft-collection-V2";
+    string public constant symbol = "XNftV2";
 
     constructor() ERC1155("") {}
 
@@ -60,20 +60,26 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         NftType[] memory nftTypes
     ) public onlyOwner notContractCall {
         uint256[] memory nftIds;
-        uint256 dummies = 0;
+        uint256 dummies;
+
+        for (uint256 i = 0; i < amounts.length; i++) {
+            require(dummies < 1, "Only one dummy per address allowed");
+
+            if (nftTypes[i] == NftType.DUMMY) {
+                require(amounts[i] <= 1, "Only one dummy per address allowed");
+                dummies += amounts[i];
+            }
+        }
+
+        delete dummies;
 
         for (uint256 i = 0; i < amounts.length; i++) {
             _nftIds.increment();
             nftIds[i] = _nftIds.current();
-            if (nftTypes[i] == NftType.DUMMY) {
-                dummies += amounts[i];
-            }
 
             _setURI(nftIds[i], tokenURIs[i]);
             _typesById[nftIds[i]] = nftTypes[i];
         }
-
-        require(dummies <= 1, "Only one dummy per address allowed");
 
         _mintBatch(recipient, nftIds, amounts, "");
     }
