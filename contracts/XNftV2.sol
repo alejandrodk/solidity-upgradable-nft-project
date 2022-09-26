@@ -18,6 +18,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
 
     mapping(uint256 => NftType) private _typesById;
     mapping(address => uint256) private _dummyOwners;
+    mapping(uint256 => bool) private _dummyTransfers;
 
     string public constant name = "XNft-collection-V2";
     string public constant symbol = "XNftV2";
@@ -26,6 +27,15 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
 
     modifier notContractCall() {
         require(tx.origin == msg.sender, "The caller is another contract");
+        _;
+    }
+
+    modifier blockDummyTransfers(uint256[] memory ids) {
+        for (uint256 i = 0; i < ids.length; i++) {
+            if (_dummyTransfers[ids[i]]) {
+                revert("NFT of type Dummy are not transferable");
+            }
+        }
         _;
     }
 
@@ -46,13 +56,9 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         address recipient,
         string memory tokenURI,
         NftType nftType
-    ) public onlyOwner notContractCall returns (uint256) {
+    ) public onlyOwner notContractCall {
         if (nftType == NftType.DUMMY && _dummyOwners[recipient] > 0) {
             revert("Only one dummy per address allowed");
-        }
-
-        if (nftType == NftType.DUMMY) {
-            _dummyOwners[recipient] += 1;
         }
 
         _nftIds.increment();
@@ -63,7 +69,10 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         _setURI(nftId, tokenURI);
         _typesById[nftId] = nftType;
 
-        return nftId;
+        if (nftType == NftType.DUMMY) {
+            _dummyOwners[recipient] += 1;
+            _dummyTransfers[nftId] = true;
+        }
     }
 
     function mintBatch(
@@ -85,6 +94,11 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
 
             if (nftTypes[i] == NftType.DUMMY) {
                 require(amounts[i] <= 1, "Only one dummy per address allowed");
+                require(
+                    _dummyOwners[recipient] < 1,
+                    "Only one dummy per address allowed"
+                );
+
                 dummies += amounts[i];
             }
         }
@@ -100,6 +114,13 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         }
 
         _mintBatch(recipient, nftIds, amounts, "");
+
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            if (nftTypes[i] == NftType.DUMMY) {
+                _dummyOwners[recipient] += 1;
+                _dummyTransfers[nftIds[i]] = true;
+            }
+        }
     }
 
     function _beforeTokenTransfer(
@@ -109,13 +130,7 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal virtual override {
+    ) internal virtual override blockDummyTransfers(ids) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-        for (uint256 i = 0; i < ids.length; i++) {
-            require(
-                _typesById[ids[i]] != NftType.DUMMY,
-                "Unable to transfer dummy"
-            );
-        }
     }
 }
