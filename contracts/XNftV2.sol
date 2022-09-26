@@ -29,6 +29,19 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
         _;
     }
 
+    modifier validMintBatchArguments(
+        uint256[] memory amounts,
+        NftType[] memory nftTypes,
+        string[] memory tokenURIs
+    ) {
+        require(
+            amounts.length == nftTypes.length &&
+                amounts.length == tokenURIs.length,
+            "Mint argument arrays must have same size"
+        );
+        _;
+    }
+
     function mint(
         address recipient,
         string memory tokenURI,
@@ -56,13 +69,18 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
     function mintBatch(
         address recipient,
         uint256[] memory amounts,
-        string[] memory tokenURIs,
-        NftType[] memory nftTypes
-    ) public onlyOwner notContractCall {
-        uint256[] memory nftIds;
+        NftType[] memory nftTypes,
+        string[] memory tokenURIs
+    )
+        public
+        onlyOwner
+        notContractCall
+        validMintBatchArguments(amounts, nftTypes, tokenURIs)
+    {
+        uint256[] memory nftIds = new uint256[](amounts.length);
         uint256 dummies;
 
-        for (uint256 i = 0; i < amounts.length; i++) {
+        for (uint256 i = 0; i < nftTypes.length; i++) {
             require(dummies < 1, "Only one dummy per address allowed");
 
             if (nftTypes[i] == NftType.DUMMY) {
