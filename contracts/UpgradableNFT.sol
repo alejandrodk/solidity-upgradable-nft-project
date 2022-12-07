@@ -5,11 +5,11 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract XNFT is ERC721URIStorage, Ownable {
+contract UpgradableNFT is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor() ERC721("XProjectNFT", "XNFT") {}
+    constructor() ERC721("UpgradableNFT", "UNFT") {}
 
     function mintNFT(address recipient, string memory tokenURI)
         public

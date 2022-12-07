@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract XNftV2 is ERC1155URIStorage, Ownable {
+contract UpgradableNFTV2 is ERC1155URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _nftIds;
 
@@ -20,8 +20,8 @@ contract XNftV2 is ERC1155URIStorage, Ownable {
     mapping(address => uint256) private _dummyOwners;
     mapping(uint256 => bool) private _dummyTransfers;
 
-    string public constant name = "XNft-collection-V2";
-    string public constant symbol = "XNftV2";
+    string public constant name = "UpgradableNFT-V2";
+    string public constant symbol = "UNFTV2";
 
     constructor() ERC1155("") {}
 

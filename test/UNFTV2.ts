@@ -2,16 +2,16 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("XNft V2 Contract", () => {
+describe("UpgradableNft V2 Contract", () => {
   async function deployContractFixture() {
     const [owner, user, sender, receiver, ...others] =
       await ethers.getSigners();
     const accounts = { owner, user, sender, receiver, others };
 
-    const XNftV2 = await ethers.getContractFactory("XNftV2");
-    const xnftv2 = await XNftV2.deploy();
+    const UNFTV2 = await ethers.getContractFactory("UNFTV2");
+    const uNftv2 = await UNFTV2.deploy();
 
-    return { contract: xnftv2, accounts };
+    return { contract: uNftv2, accounts };
   }
 
   describe("Deployment", () => {

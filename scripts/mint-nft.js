@@ -17,7 +17,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const signer = new ethers.Wallet(PRIVATE_KEY, provider);
 
 // Get contract ABI
-const contract = require("../artifacts/contracts/XNft.sol/XNFT.json");
+const contract = require("../artifacts/contracts/UpgradableNFT.sol/UNFT.json");
 const abi = contract.abi;
 const contractAddress = process.env.CONTRACT_ADDRESS;
 
